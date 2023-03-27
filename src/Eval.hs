@@ -5,10 +5,11 @@ import Exp
 import Data.List ( union, delete )
 
 
+
 vars :: Exp -> [IndexedVar]
 vars (X i) = [i]
-vars (Lam i exp) = [i] ++ (vars exp)
-vars (App exp1 exp2) = vars(exp1) ++ (vars exp2) 
+vars (Lam i exp) = if elem i (vars exp) then (vars exp) else [i] ++ (vars exp)
+vars (App exp1 exp2) = (filter (\x -> not(elem x (vars exp2))) (vars exp1)) ++ (vars exp2) 
 
 -- >>> vars (Lam (makeIndexedVar "x") (X (makeIndexedVar "y")))
 -- [IndexedVar {ivName = "x", ivCount = 0},IndexedVar {ivName = "y", ivCount = 0}]
@@ -20,8 +21,9 @@ vars (App exp1 exp2) = vars(exp1) ++ (vars exp2)
 -- [IndexedVar {ivName = "x", ivCount = 0}]
 
 freeVars :: Exp -> [IndexedVar]
-freeVars = undefined
-
+freeVars (X i) = [i]
+freeVars (Lam i exp) = if elem i (freeVars exp) then delete i (freeVars exp) else (freeVars exp)
+freeVars (App exp1 exp2) = (filter (\x -> not(elem x (freeVars exp2))) (freeVars exp1)) ++ (freeVars exp2)
 -- >>> freeVars (Lam (makeIndexedVar "x") (X (makeIndexedVar "y")))
 -- [IndexedVar {ivName = "y", ivCount = 0}]
 
@@ -35,7 +37,7 @@ freeVars = undefined
 -- []
 
 occursFree :: IndexedVar -> Exp -> Bool
-occursFree = undefined
+occursFree i exp = elem i (freeVars exp) 
 
 -- >>> makeIndexedVar "x" `occursFree` Lam (makeIndexedVar "x") (X (makeIndexedVar "y"))
 -- False
@@ -44,7 +46,8 @@ occursFree = undefined
 -- True
 
 freshVar :: IndexedVar -> [IndexedVar] -> IndexedVar
-freshVar = undefined
+freshVar (IndexedVar nume count) [] = (IndexedVar nume count)
+freshVar (IndexedVar nume count) ((IndexedVar nume2 count2) : l) = if nume == nume2 then freshVar (IndexedVar nume (count2 + 1)) l else freshVar (IndexedVar nume count) l 
 
 -- >>> freshVar (makeIndexedVar "x") [makeIndexedVar "x"]
 -- IndexedVar {ivName = "x", ivCount = 1}
