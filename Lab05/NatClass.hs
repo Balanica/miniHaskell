@@ -25,56 +25,56 @@ instance NatClass Natural.Natural where
   iter f i n = f (iter f i (n `Natural.minusNatural` 1))
 
 one :: NatClass n => n
-one = undefined
+one = succ zero
 
 -- >>> one :: Natural.Natural
 -- 1
 
 -- | The isZero function returns 'true' iff its argument is 'zero'.
 isZero :: NatClass n => n -> CBool
-isZero = undefined
+isZero n = iter (const false) true n 
 
 -- >>> isZero (one :: Natural.Natural)
 -- CFalse
 
 -- | Usual natural numbers addition
 add :: NatClass n => n -> n -> n
-add = undefined
+add n1 n2 = iter succ n1 n2 
 
 -- >>> add one one :: Natural.Natural
 -- 2
 
 -- | Usual natural numbers multiplication
 mul :: NatClass n => n -> n -> n
-mul = undefined
+mul n1 n2 = iter (add n1) zero n2
 
 -- >>> mul one one :: Natural.Natural
 -- 1
 
 -- | Usual natural numbers exponentiation (@exp m n@ is @m ^ n@)
 exp :: NatClass n => n -> n -> n
-exp = undefined
+exp a b = iter(mul a) one b
 
 -- >>> exp (add one one) (add one one) :: Natural.Natural
 -- 4
 
 -- | Predecessor of a natural number ('nothing' for 'zero')
 pred :: NatClass n  => n -> CMaybe n
-pred = undefined
+pred n = iter (just . maybe zero succ ) nothing n
 
 -- >>> pred zero :: CMaybe Natural.Natural
 -- CNothing
 
 -- | Difference between natural numbers as a 'MaybeClass' ('nothing' if first is smaller)
 sub :: NatClass n  => n -> n -> CMaybe n
-sub = undefined
+sub a b = iter (maybe nothing pred) (just a) b
 
 -- >>> sub (exp (add one one) (add one one)) one :: CMaybe Natural.Natural
 -- CJust 3
 
 -- | (Strictly-)Less-Than predicate for natural numbers.
 lt :: NatClass n => n -> n -> CBool 
-lt = undefined
+lt = 
 
 -- >>> lt (one :: Natural.Natural) one
 -- CFalse
