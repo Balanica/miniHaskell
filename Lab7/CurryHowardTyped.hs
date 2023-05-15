@@ -22,10 +22,10 @@ falseElim :: False -> b                             -- false elimination
 falseElim x = case x of
 
 implIntro :: (a -> b) -> (a -> b)                   -- implication introduction
-implIntro a b = a b  
+implIntro a = a  
 
 implElim :: (a -> b) -> a -> b                      -- implication elimination
-implElim a b = a b  
+implElim a = a
 
 andIntro :: a -> b -> And a b                       -- and introduction
 andIntro a b = And a b
@@ -65,34 +65,34 @@ iffElimR (And a b) c = b c
 -- Hilbert-style axiomatization for intuitionistic propositional logic
 
 ax1 :: a -> b -> a
-ax1 a b = implIntro 
+ax1 a b = implIntro(\a -> implIntro (\b -> a)) a b
 
 ax2 :: (a -> b) -> (a -> (b -> c)) -> a -> c
-ax2 a b c = (b c) (a c)
+ax2 f g a = implIntro(\f -> implIntro(\g -> implIntro(\a -> implIntro(implIntro g a) (implIntro f a)))) f g a
 
 ax3 :: a -> b -> And a b
-ax3 a b = And a b 
+ax3 a b = implIntro(\a -> implIntro (\b -> andIntro a b)) a b
 
 ax4 :: And a b -> a
-ax4 (And a b) = a 
+ax4  = andElimL
 
 ax5 :: And a b -> b
-ax5 (And a b) = b
+ax5 = andElimR 
 
 ax6 :: a -> Or a b
-ax6 a =  
+ax6 = orIntroL
 
 ax7 :: b -> Or a b
-ax7 = undefined
+ax7 = orIntroR
 
 ax8 :: (a -> c) -> (b -> c) -> Or a b -> c
-ax8 = undefined
+ax8 ac bc ab = orElim ab ac bc
 
 ax9 :: (a -> b) -> (a -> Not b) -> Not a
-ax9 = undefined
+ax9 ab anb = notIntro(\a -> notElim(implElim anb a)(implElim ab a)) 
 
 ax10 :: Not a -> a -> b
-ax10 = undefined
+ax10 na a = notElim na a 
 
 modusPonens :: (a -> b) -> a -> b
 modusPonens = undefined
